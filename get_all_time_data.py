@@ -74,7 +74,7 @@ df = process_data(df)
 
 # Initialize the app
 app = Dash(__name__)
-
+server = app.server
 # App layout
 app.layout = html.Div([
     html.Div(children='My First App with Data, Graph, and Controls'),
