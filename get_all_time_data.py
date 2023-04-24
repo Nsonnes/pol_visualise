@@ -25,8 +25,11 @@ def get_hour():
 
 
 def get_data():
-    return pd.read_csv("test_data.csv")
-
+    url = f"https://kbh-proxy.septima.dk/api/measurements?stations=2&meanValueTypes=24H&start=2018-01-01T08%3A00%3A00Z&end=2023-{get_hour()[2]}-{get_hour()[1]}T{get_hour()[0]}%3A00%3A00Z"
+    req = requests.get(url)
+    package_dict = json.loads(req.content)
+    df = pd.json_normalize(package_dict, record_path=["stations", "measurements"])
+    df.to_csv("test_data.csv")
 
 def check_limit_PM2(val):
     if val >= 15:
