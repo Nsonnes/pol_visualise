@@ -1,10 +1,13 @@
 # Import packages
+import dash
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import pandas as pd
 import plotly.express as px
 import json
 import requests
-import datetime
+import datetime as datetime
+import dash_bootstrap_components as dbc
+
 # Incorporate data
 
 
@@ -22,10 +25,7 @@ def get_hour():
 
 
 def get_data():
-    url = f"https://kbh-proxy.septima.dk/api/measurements?stations=2&meanValueTypes=24H&start=2018-01-01T08%3A00%3A00Z&end=2023-{get_hour()[2]}-{get_hour()[1]}T{get_hour()[0]}%3A00%3A00Z"
-    req = requests.get(url)
-    package_dict = json.loads(req.content)
-    return pd.json_normalize(package_dict, record_path=["stations", "measurements"])
+    return pd.read_csv("test_data.csv")
 
 
 def check_limit_PM2(val):
@@ -50,16 +50,18 @@ def check_limit_PM10(val):
 
 
 def process_data(df):
-    df_pm = df[["PM2_5", "NO2", "PM10", "EndLocal"]]
-    pd.to_datetime(df_pm["EndLocal"])
+    df = df[["PM2_5", "NO2", "PM10", "EndLocal"]]
+    df["EndLocal"] = pd.to_datetime(df["EndLocal"])  # format without hour
+    #df["EndLocal"] = df["EndLocal"].dt.floor('D')
+    df["EndLocal"] = df["EndLocal"].dt.date
+    # print(df[["EndLocal"]])
 
-    df_pm["EndLocal"] = pd.to_datetime(df_pm["EndLocal"])
     #df_pm["month"] = df_pm['EndLocal'].dt.month
     #df_pm["year"] = df_pm['EndLocal'].dt.year
-    #df_pm["day"] = df_pm['EndLocal'].dt.day
-    df["ExceededPM2"] = df_pm["PM2_5"].apply(check_limit_PM2)
-    df["ExceededNO2"] = df_pm["NO2"].apply(check_limit_NO2)
-    df["ExceededPM10"] = df_pm["PM10"].apply(check_limit_PM10)
+    #df["day"] = df['EndLocal'].dt.day
+    df["ExceededPM2"] = df["PM2_5"].apply(check_limit_PM2)
+    df["ExceededNO2"] = df["NO2"].apply(check_limit_NO2)
+    df["ExceededPM10"] = df["PM10"].apply(check_limit_PM10)
 
     return df
 
@@ -73,27 +75,114 @@ df = process_data(df)
 
 
 # Initialize the app
-app = Dash(__name__)
+#app = Dash(__name__)
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 server = app.server
-# App layout
-app.layout = html.Div([
-    html.Div(children='My First App with Data, Graph, and Controls'),
-    html.Hr(),
-    dcc.RadioItems(options=['ExceededPM2', 'PM10', 'NO2'],
-                   value='NO2', id='controls-and-radio-item'),
-    dcc.Graph(figure={}, id='controls-and-graph')
+
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            html.H1("Luftforurening i København")
+        ], width=6,),
+    ], justify="center"),
+
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(figure={}, id='plot')
+        ], width=10),
+        dbc.Col([
+            html.Div(
+                children="", className="box1",
+                style={
+                    'backgroundColor': 'rgb(54, 13, 18)',
+                    'color': 'lightsteelblue',
+                    'height': '18px',
+                    'width': '45%',
+                    'display': 'inline-block',
+
+                }
+
+
+            ), html.Div(children="Overskrider WHO grænseværdi", style={'textAlign': 'left', 'display': 'inline-block'}),
+            html.Div(
+                children="", className="box1",
+                style={
+                    'backgroundColor': 'rgb(240, 236, 236)',
+                    'color': 'lightsteelblue',
+                    'height': '18px',
+                    'width': '45%',
+                    'display': 'inline-block',
+
+                }), html.Div(children="Under WHO grænseværdi", style={'textAlign': 'left', 'display': 'inline-block'})
+
+        ], width=2)
+
+    ], justify="center"),
+    dbc.Row([
+        dbc.Col([
+            dcc.Dropdown([
+                {
+                    "label": html.Span(['PM2.5'], style={'font-size': 15, 'font': 'Segoe UI'}),
+                    "value": "ExceededPM2",
+                },
+                {
+                    "label": html.Span(['PM10'], style={'font-size': 15, 'font': 'Segoe UI'}),
+                    "value": "ExceededPM10",
+                },
+                {
+                    "label": html.Span(['NO2'], style={'font-size': 15, 'font': 'Segoe UI'}),
+                    "value": "ExceededNO2",
+                }],  value='ExceededPM2',  id='controls-and-radio-item'
+
+
+
+
+
+
+
+
+
+
+            )
+        ], width=2)
+    ], justify="left")
+
+
 ])
+
+
+# App layout
+
 
 # Add controls to build the interaction
 
 
 @callback(
-    Output(component_id='controls-and-graph', component_property='figure'),
+    Output(component_id='plot', component_property='figure'),
     Input(component_id='controls-and-radio-item', component_property='value')
 )
 def update_graph(col_chosen):
     df_piv = pivot_data(df, col_chosen)
-    fig = px.imshow(df_piv,template="ggplot2")
+    # , range_color =[-0.9,1.8]#color_continuous_scale='RdBu_r', range_color =[-0.5,1.2]
+    names = {"ExceededPM2": "PM2.5",
+             "ExceededPM10": "PM10", "ExceededNO2": "NO2"}
+    exceeded = {0: "Nej", 1: "Ja"}
+    colorscale = [[0, '#454D59'],
+                  [1, '#454D59']]
+    fig = px.imshow(df_piv, template="ggplot2",
+                    title=f"{names[col_chosen]} målt ved søtorvet 5", zmin=0, zmax=1, color_continuous_scale='amp')
+
+    fig.update_traces(hoverongaps=False, showscale=False,
+                      hovertemplate="Pollutant measured: %{y}"
+                      "<br>Date: %{x}"
+                      "<br>Overskrider grænseværdi: %{z}")
+    fig.update_layout(xaxis_nticks=12, xaxis_title=None)
+    fig.update_yaxes(visible=False, showticklabels=False)
+    fig.update_coloraxes(showscale=False)
+    fig.layout.coloraxis.colorbar.title = 'Title<br>Here'
+    fig.update_traces(showscale=False)
+
     return fig
 
 
