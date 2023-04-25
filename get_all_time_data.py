@@ -32,7 +32,6 @@ def get_data():
     req = requests.get(url)
     package_dict = json.loads(req.content)
     return pd.json_normalize(package_dict, record_path=["stations", "measurements"])
-    
 
 def check_limit_PM2(val):
     if val >= 15:
@@ -57,6 +56,7 @@ def check_limit_PM10(val):
 
 def process_data(df):
     df = df[["PM2_5", "NO2", "PM10", "EndLocal"]]
+    print(df)
     df["EndLocal"] = pd.to_datetime(df["EndLocal"])  # format without hour
     #df["EndLocal"] = df["EndLocal"].dt.floor('D')
     df["EndLocal"] = df["EndLocal"].dt.date
@@ -77,6 +77,7 @@ def pivot_data(df, val):
 
 
 df = get_data()
+print(df)
 df = process_data(df)
 
 
