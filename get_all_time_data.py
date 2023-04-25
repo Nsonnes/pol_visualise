@@ -84,7 +84,8 @@ df = process_data(df)
 # Initialize the app
 #app = Dash(__name__)
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LITERA],  meta_tags=[{'name': 'viewport',
+                            'content': 'width=device-width, initial-scale=1.0, maximum-scale=1.2, minimum-scale=0.5,'}])
 server = app.server
 
 
@@ -137,7 +138,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.H1("Luftforurening i København")
-        ], width=6,),
+        ], xs=9, lg=5, xl=8),
     ], justify="center"),
 
     dbc.Row([
@@ -147,61 +148,54 @@ app.layout = dbc.Container([
                 style={
                     'backgroundColor': 'rgb(54, 13, 18)',
                     'color': 'lightsteelblue',
-                    'height': '18px',
-                    'width': '45%',
+                    'height': '30px',
+                    'width': '50px',
                     'display': 'inline-block',
+                    "margin-left": '100px',
+                    "margin-top": '40px'
 
                 }
 
 
-            )
-    
-            
-        ])
-    ]),
-
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(figure=fig, id='plot')
-        ], width=10),
-        dbc.Col([
-            html.Div(
-                children="", className="box1",
-                style={
-                    'backgroundColor': 'rgb(54, 13, 18)',
-                    'color': 'lightsteelblue',
-                    'height': '18px',
-                    'width': '45%',
-                    'display': 'inline-block',
-
-                }
-
-
-            ), html.Div(children="Overskrider WHO grænseværdi", style={'textAlign': 'left', 'display': 'inline-block'}),
-            html.Div(
+            ), html.Div(children="Overskrider WHO grænseværdi", style={'textAlign': 'center', 'display': 'inline-block', "margin-left": '15px'}),
+                            html.Div(
                 children="", className="box1",
                 style={
                     'backgroundColor': 'rgb(240, 236, 236)',
                     'color': 'lightsteelblue',
-                    'height': '18px',
-                    'width': '45%',
+                    'height': '30px',
+                    'width': '50px',
                     'display': 'inline-block',
+                    "margin-left": '100px',
+                    "margin-top": '40px'
 
-                }), html.Div(children="Under WHO grænseværdi", style={'textAlign': 'left', 'display': 'inline-block'})
+                }
 
-        ], width=2)
 
-    ], justify="center"),
+            ), html.Div(children="Overskrider ikke WHO grænseværdi", style={'textAlign': 'center', 'display': 'inline-block', "margin-left": '15px'}),
+
+    
+            
+        ],xs=8, lg=5, xl=10)
+    ], justify="left"),
+
+
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(figure=fig, id='plot')
+        ], xs=12, lg=5, xl=10),
+
+    ]),
     dbc.Row([
         dbc.Col([
             dcc.Graph(figure=fig2, id='plot2')
  
-        ], width=10)
+        ], xs=12, lg=5, xl=10)
     ], justify="left"),
     dbc.Row([
         dbc.Col([
             dcc.Graph(figure=fig3, id="plot3")
-        ], width=10)
+        ], xs=12, lg=5, xl=10)
     ])
 
 
