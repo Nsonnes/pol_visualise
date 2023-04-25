@@ -16,6 +16,7 @@ def get_hour():
     now = datetime.datetime.now()
     end_date = now.strftime("%d")
     end_hour = now.strftime("%H")
+    print(end_hour)
     end_month = now.strftime("%m")
     if int(end_hour) == 0:
         return [end_hour, end_date, end_month]
