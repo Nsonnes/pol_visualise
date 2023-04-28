@@ -16,20 +16,23 @@ def get_hour():
     now = datetime.datetime.now()
     end_date = now.strftime("%d")
     end_hour = now.strftime("%H")
+    print(end_hour)
     #print(end_hour)
     end_month = now.strftime("%m")
     if int(end_hour) == 0:
         return [end_hour, end_date, end_month]
-    if int(end_hour) < 10:
-        end_hour = str(f"0{end_hour}")
-        return [end_hour, end_date, end_month]
+    #if int(end_hour) < 10:
+        #end_hour = str(f"0{end_hour}")
+       # return [end_hour, end_date, end_month]
     else:
         return [end_hour, end_date, end_month]
 
 
 def get_data():
     url = f"https://kbh-proxy.septima.dk/api/measurements?stations=2&meanValueTypes=24H&start=2018-01-01T08%3A00%3A00Z&end=2023-{get_hour()[2]}-{get_hour()[1]}T{get_hour()[0]}%3A00%3A00Z"
+    print(url)
     req = requests.get(url)
+
     package_dict = json.loads(req.content)
     return pd.json_normalize(package_dict, record_path=["stations", "measurements"])
 
@@ -112,16 +115,16 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.H1("Luftforurening i København")
-        ], xs=9, lg=5, xl=8),
+        ], xs=9, lg=10, xl=8),
     ], justify="center"),
 
     dbc.Row([
-        dbc.Col([
+        dbc.Col([html.Div(style={"margin-top": '70px'}),
             html.Div([
-    dcc.RangeSlider(marks={2020:"2020", 2021:"2021", 2022:"2022", 2023:"2023"}, step=1, min=2020,max=2023, value=[2020,2023], dots=True, id='my-range-slider'),
+    dcc.RangeSlider(marks={2020:"2020", 2021:"2021", 2022:"2022", 2023:"2023"}, step=1, min=2020,max=2023, value=[2020,2023], dots=True, id='my-range-slider'), 
     html.Div(id='crossfilter-year--slider')
             ])
-        ],  xs=9, lg=5, xl=10)
+        ],  xs=12, lg=5, xl=10)
     ], justify="left"),
 
     dbc.Row([
@@ -159,7 +162,7 @@ app.layout = dbc.Container([
 
     
             
-        ],xs=8, lg=5, xl=10)
+        ],xs=4, lg=5, xl=10)
     ], justify="left"),
 
 
@@ -214,11 +217,13 @@ def update_graph(val):
         df_sorted = df.loc[df['year'].isin(range_val)]
 
     
-
+    def get_count(df):
+        return (df == 1).sum()
 
     #df_sorted = df.loc[df['year'].isin(range_val)]
 
     df_piv = pivot_data(df_sorted, "ExceededPM2")
+    #print((df_sorted["ExceededPM2"]==1).sum())
     df_piv2 = pivot_data(df_sorted, "ExceededPM10")
     df_piv3 = pivot_data(df_sorted, "ExceededNO2")
 
@@ -227,8 +232,8 @@ def update_graph(val):
     names = {"ExceededPM2": "PM2.5",
             "ExceededPM10": "PM10", "ExceededNO2": "NO2"}
     exceeded = {0: "Nej", 1: "Ja"}
-    fig = px.imshow(df_piv, template="ggplot2",
-                    title=f"PM2.5 målt ved søtorvet 5", zmin=0, zmax=1, color_continuous_scale='amp')
+    fig = px.imshow(df_piv, template="ggplot2", 
+                    title=f'PM2.5 målt ved søtorvet 5. <br> Antal overskridelser af grænseværdi: {(df_sorted["ExceededPM2"]==1).sum()} dage', zmin=0, zmax=1, color_continuous_scale = 'amp'  ) #[0, 'rgb(240, 236, 236)'], [1, 'rgb(215,192,184)']]
 
     fig.update_traces(hoverongaps=False, showscale=False,
                     hovertemplate="Pollutant measured: %{y}"
@@ -239,10 +244,10 @@ def update_graph(val):
     fig.update_coloraxes(showscale=False)
     fig.layout.coloraxis.colorbar.title = 'Title<br>Here'
     fig.update_traces(showscale=False)
-    
+
 
     fig2 = px.imshow(df_piv2, template="ggplot2",
-            title=f"PM10 målt ved søtorvet 5", zmin=0, zmax=1, color_continuous_scale='amp')
+            title=f'PM10 målt ved søtorvet 5.  <br> Antal overskridelser af grænseværdi: {(df_sorted["ExceededPM10"]==1).sum()}', zmin=0, zmax=1, color_continuous_scale='amp')
 
     fig2.update_traces(hoverongaps=False, showscale=False,
                     hovertemplate="Pollutant measured: %{y}"
@@ -255,7 +260,7 @@ def update_graph(val):
     fig2.update_traces(showscale=False)
 
     fig3 = px.imshow(df_piv3, template="ggplot2",
-        title=f"NO2 målt ved søtorvet 5", zmin=0, zmax=1, color_continuous_scale='amp')
+        title=f'NO2 målt ved søtorvet 5 <br> Antal overskridelser af grænseværdi: {(df_sorted["ExceededNO2"]==1).sum()}', zmin=0, zmax=1, color_continuous_scale='amp')
 
     fig3.update_traces(hoverongaps=False, showscale=False,
                     hovertemplate="Pollutant measured: %{y}"
@@ -275,3 +280,6 @@ def update_graph(val):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+
