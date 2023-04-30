@@ -136,6 +136,11 @@ def make_graph(df, title):
         paper_bgcolor='rgb(245,244,244)',
         width=1250,
         height=450,
+        yaxis = dict(
+        tickmode = 'linear',
+        tick0 = 2020,
+        dtick = 1
+        ),
 
 
         title=dict(text=f'<b>{title}<b>', y=0.98, x=0, xanchor='left',
