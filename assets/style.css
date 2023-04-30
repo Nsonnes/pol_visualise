@@ -1,0 +1,29 @@
+.firstplot {
+
+    border: 30px solid #F5F4F4;
+    border-radius: 20px;    
+
+    
+
+
+}
+
+.heading {
+    font-family: 'Inter', sans-serif;
+    color: #7E7978;
+    font-weight : 1000;
+}
+
+
+.Select-value {
+    font-family: 'Inter', sans-serif;
+    color: #7E7978;
+}
+
+.Select-control {
+    background-color:#F5F4F4 !important;
+  }
+  
+  .Select-menu-outer {
+    background-color: #F5F4F4;
+  }
