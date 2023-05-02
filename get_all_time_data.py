@@ -24,7 +24,7 @@ def get_hour():
 
 
 def get_data(val):
-    url = f"https://kbh-proxy.septima.dk/api/measurements?stations={val}&meanValueTypes=24H&start=2018-01-01T08%3A00%3A00Z&end=2023-{get_hour()[2]}-{get_hour()[1]}T{get_hour()[0]}%3A00%3A00Z"
+    url = f"https://kbh-proxy.septima.dk/api/measurements?stations={val}&meanValueTypes=24H&start=2021-01-01T08%3A00%3A00Z&end=2023-{get_hour()[2]}-{get_hour()[1]}T{get_hour()[0]}%3A00%3A00Z"
     print(url)
     req = requests.get(url)
 
@@ -78,10 +78,10 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.H1([
-                "Luftforurening: Overskridelser af WHO grænseværdier"]),
+                "Overskridelser af WHO grænseværdier"]),
             html.H2(id="heading")
 
-        ], xs=9, lg=10, xl=12, class_name="heading"),
+        ], xs=9, lg=10, xl=10, class_name="heading"),
     ], justify="center"),
 
     dbc.Row([
@@ -135,7 +135,7 @@ def make_graph(df, title):
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgb(245,244,244)',
         width=1250,
-        height=450,
+        height=400,
         yaxis = dict(
         tickmode = 'linear',
         tick0 = 2020,
