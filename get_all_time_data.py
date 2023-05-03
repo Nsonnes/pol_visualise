@@ -124,8 +124,8 @@ app.layout = dbc.Container([
 
 
 def make_graph(df, title):
-    f = px.imshow(df, template="ggplot2", color_continuous_scale="turbid",  # amp
-                  labels=dict(color="Antal overskridelser"),
+    f = px.imshow(df, template="ggplot2", color_continuous_scale="amp",  # amp
+                  labels=dict(color="Antal dage overskredet"),
                   x=['Jan', 'Feb', 'Mar', 'Apr', 'Maj', "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"], text_auto=True, range_color=[0, 16]
 
                   )
